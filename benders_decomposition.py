@@ -15,6 +15,7 @@ class BendersDecomposition:
         self.eps = eps
         self.n = len(q)
         self.d = len(c)
+        self.m = len(h[0])
 
         self.UPPER_BOUND = 10e15
         self.LOWER_BOUND = -10e15
@@ -59,7 +60,7 @@ class BendersDecomposition:
         return x, y, iteration, self.LOWER_BOUND
     
     def solve_subproblem(self, i, x):
-        lamb = cp.Variable(len(self.h[i]))
+        lamb = cp.Variable(self.m)
         subproblem_objective = cp.Maximize(lamb @ (self.h[i] - self.T[i] @ x))
         subproblem = cp.Problem(subproblem_objective, [self.W[i].T @ lamb <= self.q[i]])
         subproblem.solve()
@@ -68,7 +69,7 @@ class BendersDecomposition:
         return lamb.value, subproblem.value, subproblem.status, yi
     
     def solve_farkas_subproblem(self, i, x):
-        sigma = cp.Variable(len(self.h[i]))
+        sigma = cp.Variable(self.m)
         subproblem_constraints = [sigma @ (self.h[i] - self.T[i] @ x) == 1, self.W[i].T @ sigma <= 0]
         subproblem = cp.Problem(cp.Minimize(0), subproblem_constraints)
         subproblem.solve()
