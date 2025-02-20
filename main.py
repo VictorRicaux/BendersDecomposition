@@ -1,4 +1,5 @@
 from benders_decomposition import BendersDecomposition
+from progressive_hedging import ProgressiveHedging
 import numpy as np
 
 
@@ -25,10 +26,19 @@ T = np.array([np.ones((1, 2)) for _ in range(n)])  # Coefficients for coupling c
 W = np.array([np.array([[-1]]) for _ in range(n)])  # Coefficients for wind power constraints
 h = np.array([[d[i] - w_max[i]] for i in range(n)])  # Right-hand side for each scenario
 q = [np.array([-c_w]) for _ in range(n)]  # Cost coefficients for wind power in each scenario, ensure it's 2D
+rho = 1000
+
 
 def main():
     benders_decomposition = BendersDecomposition(c, A, b, q, r, T, W, h)
     x_opt, y_opt, iterations, obj_value = benders_decomposition.solve_problem()
+    print("Optimal value: ", obj_value)
+    print("Optimal solution: ", x_opt)
+    print("Iterations: ", iterations)
+    print()
+
+    progressive_hedging = ProgressiveHedging(c, A, b, q, r, T, W, h, rho)
+    obj_value, x_opt, y_opt, iterations = progressive_hedging.solve_problem()
     print("Optimal value: ", obj_value)
     print("Optimal solution: ", x_opt)
     print("Iterations: ", iterations)
